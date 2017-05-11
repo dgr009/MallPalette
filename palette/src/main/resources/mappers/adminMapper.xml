@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.icia.palette.adminDao">
+	
+	
+	<!-- 홈페이지 개설회원 조회	-->
+	<select id="selectUserById" parameterType="string" resultType="User">
+		select userid,username,email,regdate,img from users where userid=#{userid}
+	</select>
+	
+	<select id=""
+	select user_ishome from users where user_ishome='true';
+-- 개설회원정보상세보기
+  select user_ishome from users where user_ishome='true';
+-- 전체회원목록조회
+  select user_id , user_name from users;
+-- 회원상세조회
+  select * from users;
+-- 회원삭제
+  delete from users where user_id;
+-- 회원정보수정 
+  update users set user_id='user_id', user_pwd='user_pwd', user_name='user_name', user_address='user_address', user_post='user_post', user_mail='user_mail', user_phone_'user_phone', user_ishome='user_ishome', user_grade='user_grade' where user_id=user_id; 
+-- 하루매출보기         t가 매출액 b가 테이블이름 d가 날짜
+  SELECT TO_CHAR(TO_DATE(order_date,'yyyy-mm-dd'),'dd') AS order_date, SUM(order_price) AS order_price FROM order_statement GROUP BY TO_CHAR(TO_DATE(order_date,'yyyy-mm-dd'),'dd') order by order_date desc;
+-- 한달매출보기
+  SELECT TO_CHAR(TO_DATE(d,'yyyy-mm-dd'),'mm') AS d , SUM(t) AS t FROM b GROUP BY TO_CHAR(TO_DATE(d,'yyyy-mm-dd'),'mm') order by d desc;
+-- 전체매출보기
+
+-- 회원하루매출보기
+	
+-- 회원한달매출보기
+
+-- 회원전체매출보기
+
+-- 공지사항 상세보기
+  select * from MAIN_NOTICE_BOARD;
+-- 공지사항 삭제
+  delete from MAIN_NOTICE_BOARD where MAIN_NOTICE_ARTICLE_NO;
+-- 공지사항 수정
+  update MAIN_NOTICE_BOARD set MAIN_NOTICE_ARTICLE_TITLE='MAIN_NOTICE_ARTICLE_TITLE', MAIN_NOTICE_ARTICLE_CONTENT='MAIN_NOTICE_ARTICLE_CONTENT' where MAIN_NOTICE_ARTICLE_NO=MAIN_NOTICE_ARTICLE_NO;
+-- 공지사항 작성 
+  insert into MAIN_NOTICE_BOARD(main_notice_article_no, main_notice_article_title, main_notice_article_content, main_notice_article_date) values (main_notice_article_no, main_notice_article_title, main_notice_article_content, main_notice_article_date);
+	
+	
+</mapper>
