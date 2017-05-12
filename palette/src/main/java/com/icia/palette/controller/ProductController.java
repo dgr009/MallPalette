@@ -16,4 +16,10 @@ public class ProductController {
 		return "products/ProductRegister";
 		
 	}
+	
+	@RequestMapping(value="/productRegister2",method=RequestMethod.GET)
+	public String productRegister2(){
+		return "main/Main";
+		
+	}
 }

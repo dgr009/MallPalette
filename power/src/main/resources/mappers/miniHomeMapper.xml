@@ -4,7 +4,7 @@
 <mapper namespace="api.dao.HomeDao">
 
 	<!-- 홈페이지 개설 -->
-	<insert id="miniHomeRegisterHomepage" parameterType="MiniHome">
+	<insert id="miniHomeRegister" parameterType="MiniHome">
 		insert into home values(#{userId},#{homeTitle},#{homeImg},#{homeDesign},sysdate,0,#{homeIntroduce})
 	</insert>
 	
@@ -20,33 +20,23 @@
 	</delete>
 	
 	<!-- 홈페이지 결제 : 결제기록 생성 -->
-	<update id="miniHomeInsertTradeStatementForPay" parameterType="ActiveDate">
+	<insert id="miniHomeInsertTradeStatementForPay" parameterType="ActiveDate">
 		<selectKey keyProperty="activeNo" resultType="int" order="BEFORE">
 			select seq_active.nextval from dual
 		</selectKey>
 		insert into activedate(activeno,active_start,user_id) values(#{activeNo},sysdate,#{userId})
-	</update>
+	</insert>
 	
 	<!-- 홈페이지 결제 : 회원 포인트 차감 -->
 	<update id="miniHomeDecreaseUsersPointForPay" parameterType="hashmap">
-		update users set user_point=user_point-#{price} where user_id=#{userId};
+		update users set user_point=user_point-#{price} where user_id=#{userId}
 	</update>
 	
-	<resultMap id="getMini" type="com.icia.api.vo.MiniHome">
-		<result property="userName" column="user_name"/>				
-		<result property="userMail" column="user_mail"/>
-		<result property="userPhone" column="user_phone"/>
-		<result property="userGrade" column="user_grade"/>
-	</resultMap>
-	
-	<resultMap id="getMiniJoinActive" type="com.icia.api.vo.ActiveDate" extends="getMini">
-		<result property="homeIntroduce" column="home_introduce"/>	
-	</resultMap>
 	
 	<!-- 판매자(홈페이지 주인) 회원정보조회 -->
-	<select id="miniHomeSelectSellerInformation" parameterType="string" resultMap="getMiniJoinActive">
-		select u.user_name,u.user_mail,u.user_phone,u.user_grade,h.home_introduce from users u, home h 
-		where u.user_id=h.user_id and u.user_id=#{userId}
+	<select id="miniHomeSelectSellerInformation" parameterType="string" resultType="MiniHomeUserInformation">
+		select u.user_name userName,u.user_mail userMail ,u.user_phone userPhone,u.user_grade userGrade,
+		h.home_introduce homeIntroduce from users u, home h where u.user_id=h.user_id and u.user_id=#{userId}
 	</select>
 	
 	
