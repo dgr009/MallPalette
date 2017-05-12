@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="api.dao.MainDao">
+
+	<!--자유게시판 리스트목록 얻어 오기(페이징) -->
+	<select id="mainFreeBoardList" parameterType="hashmap" resultType="MainFreeBoardList">
+	<![CDATA[
+		 select * from  
+			(select rownum rnum, b1.* from
+				(select main_article_no, main_article_title,main_article_name,main_article_hits,main_article_date from main_free_board order by main_article_no desc) b1
+			where rownum <=#{end}) b2
+		where rnum>=#{start}
+		]]>
+	</select>
+	
+	<!-- 자유게시판 전체 글 개수 출력 -->
+	<select id="mainFreeBoardCount"  resultType="int">
+			select count(*)	 from main_free_board
+	</select>
+	
+	<!--자유게시판 상세보기 -->
+	<select id="mainFreeBoardView" parameterType="int" resultType="MainFreeBoard">
+	select main_article_title,main_aricle_name,main_article_hits,main_article_content,main_article_date,user_id from main_free_board where main_article_no=#{mainArticleNo}
+	</select>
+	
+	<!--자유게시판 생성하기-->
+	<insert id="mainFreeBoardInsert" parameterType="MainFreeBoard">
+		<selectKey keyProperty="mainArticleNo" resultType="int" order="BEFORE">
+	    	select main_free_board_seq.nextval from dual
+	  	</selectKey>
+		insert into main_free_board(main_article_no,main_article_title,main_article_name, main_article_hits,main_article_content ,main_article_date,user_id) 
+		values(#{mainArticleNo},#{mainArticleTitle},#{mainArticleName},0,#{mainArticleContent},sysdate,#{userId})
+	</insert>
+	
+	<!-- 자유게시판 삭제하기 -->
+	<delete id="mainFreeBoardDelete" parameterType="int">
+	delete from main_free_board where main_article_no=#{mainArticleNo}
+	</delete>
+	
+	<!--자유게시판 수정하기-->
+	<update id="mainFreeBoardUpdate" parameterType="MainFreeBoard">
+		update main_free_board set main_article_title=#{mainArticleTitle},main_article_name=#{mainArticleName},main_article_content=#{mainArticleContent} where main_article_no=#{mainArticleNo}
+	</update>	
+	
+	<!--자유게시판 조회수 증가 -->
+	<update id="mainFreeBoardHitsCnt">
+		select main_free_board set main_article_hits=main_article_hits+1 where main_article_no=#{mainArticleNo}
+	</update>
+	
+	<!-- 댓글 생성 -->
+	<insert id="mainFreeBoardRepleInsert" parameterType="MainFreeReple">
+  		<selectKey keyProperty="mainFreeRepleNo" resultType="int" order="BEFORE">
+  			select main_free_reple_seq.nextval from dual
+  		</selectKey>
+  			insert into main_free_reple(main_free_reple_no,main_article_no,main_free_reple_name,main_free_reple_content,main_free_date)
+  			values(#{mainFreeReple},#{mainArticleNo},#{mainFreeRepleName},#{mainFreeRepleContent},sysdate)
+	</insert>	
+	<!--댓글 수정 -->
+	<update id="mainFreeBoardRepleUpdate" parameterType="MainFreeReple">
+		update main_free_board set main_free_reple_content=#{mainFreeRepleContent} where main_free_reple_no=#{mainFreeRepleNo}
+	</update>
+	<!--댓글 삭제-->
+	<delete id="mainFreeBoardRepleDelete" parameterType="int">
+		delete from main_free_reple where main_free_reple_no=#{mainFreeRepleNo}
+	</delete>
+		
+	<!--공지게시판 리스트목록 얻어 오기(페이징) -->
+	<select id="mainNoticeBoardList" parameterType="hashmap" resultType="MainNoticeBoard">
+	<![CDATA[
+		 select * from  
+			(select rownum rnum, b1.* from
+				(select main_notice_article_no, main_notice_article_title,main_notice_article_content,main_notice_article_date from main_notice_board order by main_notice_article_no desc) b1
+			where rownum <=#{end}) b2
+		where rnum>=#{start}
+		]]>
+	</select>
+	<!--공지게시판 생성하기-->
+	<insert id="mainNoticeBoardInsert" parameterType="MainNoticeBoard">
+		<selectKey keyProperty="mainNoticeArticleNo" resultType="int" order="BEFORE">
+	    	select main_notice_board_seq.nextval from dual
+	  	</selectKey>
+		insert into main_notice_board(main_notice_article_no,main_notice_article_title,main_notice_article_content ,main_notice_article_date) 
+		values(#{mainNoticeArticleNo},#{mainNoticeArticleTitle},#{mainNoticeArticleContent},sysdate)
+	</insert>
+	
+	<!--공지게시판 상세보기 -->
+	<select id="mainNoticeBoardView" parameterType="int" resultType="MainNoticeBoard">
+	select main_notice_article_no,main_notice_article_title,main_notice_article_content,main_notice_article_date from main_notice_board  where main_notice_article_no=#{mainNoticeArticleNo}
+	</select>
+ 	
+ 	<!--공지게시판 삭제 -->
+	<delete id="mainNoticeBoardDelete" parameterType="int">
+	delete from main_notice_board where main_notice_article_no=#{mainNoticeArticleNo}
+	</delete>
+	<!--공지게시판 수정하기-->
+	<update id="mainNoticeBoardUpdate" parameterType="MainNoticeBoard">
+		update main_notice_board set 
+		 main_notice_article_title=#{mainNoticeArticleTitle}
+		,main_notice_article_name=#{mainNoticeArticleName}
+		,main_notice_article_content=#{mainNoticeArticleContent}
+		 where main_notice_article_no=#{mainNoticeArticleNo}
+	</update>	
+ 	<!-- ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ -->
+ 		<!--고객센터 게시판 리스트목록 얻어 오기(페이징) -->
+	<select id="mainServiceCenterList" parameterType="hashmap" resultType="ServiceCenter">
+	<![CDATA[
+		 select * from  
+			(select rownum rnum, b1.* from
+				(select faq_no, faq_title,faq_content,faq_date from service_center order by faq_no desc) b1
+			where rownum <=#{end}) b2
+		where rnum>=#{start}
+		]]>
+	</select>
+	<!--고객센터 게시판 생성하기-->
+	<insert id="mainServiceCenterInsert" parameterType="SerivceCenter">
+		<selectKey keyProperty="faq_no" resultType="int" order="BEFORE">
+	    	select service_center_seq.nextval from dual
+	  	</selectKey>
+		insert into service_center(faq_no,faq_title,faq_content ,faq_date) 
+		values(#{FaqNo},#{FaqTitle},#{FaqContent},sysdate)
+	</insert>
+	
+	<!--고객센터 게시판 상세보기 -->
+	<select id="mainServiceCenterView" parameterType="int" resultType="ServiceCenter">
+	select faq_no,faq_title,faq_content,faq_date from service_center where faq_no=#{FaqNo}
+	</select>
+ 	
+ 	<!--고객센터 게시판 삭제 -->
+	<delete id="mainServiceCenterDelete" parameterType="int">
+	delete from service_center where faq_no=#{FaqNo}
+	</delete>
+	
+	<!--고객센터 게시판 수정하기-->
+	<update id="mainServiceCenterUpdate" parameterType="ServiceCenter">
+		update service_center set 
+		 faq_title=#{mainFaqTitle},faq_name=#{mainFaqName},faq_content=#{mainFaqContent}
+		 where faq_no=#{mainFaqNo}
+	</update>	
+	<!-- ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ -->
+ 	
+ 	
+ 	<!--검색창에 검색해서 상품보기-->
+ 	<select id="mainSearchItem" parameterType="String" resultType="Searchitem">
+ 		select i.item_name itemName,i.item_content itemContent,i.item_price itemPrice,i.item_date itemDate,img.img_name imgName
+ 		from item i,item_img img where i.item_no={itemNo} and img.item_no={itemNo}  
+ 	</select>
+ 	
+ 	
+ 	<!--최신 상품 갖고오기 -->
+ 	<select id="mainNewItem"  resultType="item">
+	<![CDATA[
+	select * from
+		(select rownum rnum,b.itemNo,b.itemName,b.itemPrice,b.itemSize,b.itemInven
+		b.itemDate,b.userId,b.bigKind,b.smallKind from  
+	(select * from item order by item_date desc)b) where rnum<=10
+ 	]]>
+ 	</select>
+ 	
+ 	
+ 	<!--최신개설 홈페이지 갖고오기  고치기-->
+ 	<select id="mainNewProducddt" parameterType="String" resultType="home">
+	<![CDATA[
+	select * from
+		(select rownum rnum,b.itemNo,b.itemName,b.itemPrice,b.itemSize,b.itemInven
+		b.itemDate,b.userId,b.bigKind,b.smallKind from  
+	(select * from item order by hm_date desc)b) where rnum<=3
+ 	]]>
+ 	</select>
+
+ 	<!--개인 홈페이지 리스트  손봐야함-->
+	<select id="mainCustomerCenterList" parameterType="hashmap" resultType="CustomerCenter">
+	<![CDATA[
+		 select * from  
+			(select rownum rnum, b1.* from
+				(select userId, homeTitle,homeImg,homeHits,homeIntroduce from home order by mainFaqNo desc) b1
+			where rownum <=#{end}) b2
+		where rnum>=#{start}
+		]]>
+	</select>
+ 
+ 	
+</mapper>
