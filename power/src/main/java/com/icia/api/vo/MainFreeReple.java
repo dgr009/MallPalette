@@ -12,4 +12,5 @@ public class MainFreeReple {
 	private String mainFreeRepleName;
 	private String mainFreeRepleContent;
 	private Date mainFreeDate;
+	private int mainFreeRepleCnt;
 }

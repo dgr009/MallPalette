@@ -21,7 +21,7 @@
 	
 	<!--자유게시판 상세보기 -->
 	<select id="mainFreeBoardView" parameterType="int" resultType="MainFreeBoard">
-	select main_article_title,main_aricle_name,main_article_hits,main_article_content,main_article_date,user_id from main_free_board where main_article_no=#{mainArticleNo}
+	select main_article_title,main_aricle_name,main_article_hits,main_article_content,main_article_date,user_id,main_free_reple_cnt from main_free_board where main_article_no=#{mainArticleNo}
 	</select>
 	
 	<!--자유게시판 생성하기-->
@@ -29,8 +29,8 @@
 		<selectKey keyProperty="mainArticleNo" resultType="int" order="BEFORE">
 	    	select main_free_board_seq.nextval from dual
 	  	</selectKey>
-		insert into main_free_board(main_article_no,main_article_title,main_article_name, main_article_hits,main_article_content ,main_article_date,user_id) 
-		values(#{mainArticleNo},#{mainArticleTitle},#{mainArticleName},0,#{mainArticleContent},sysdate,#{userId})
+		insert into main_free_board(main_article_no,main_article_title,main_article_name, main_article_hits,main_article_content ,main_article_date,user_id,main_free_reple_cnt) 
+		values(#{mainArticleNo},#{mainArticleTitle},#{mainArticleName},0,#{mainArticleContent},sysdate,#{userId},#{mainFreeRepleCnt})
 	</insert>
 	
 	<!-- 자유게시판 삭제하기 -->
@@ -40,7 +40,7 @@
 	
 	<!--자유게시판 수정하기-->
 	<update id="mainFreeBoardUpdate" parameterType="MainFreeBoard">
-		update main_free_board set main_article_title=#{mainArticleTitle},main_article_name=#{mainArticleName},main_article_content=#{mainArticleContent} where main_article_no=#{mainArticleNo}
+		update main_free_board set main_article_title=#{mainArticleTitle},main_article_content=#{mainArticleContent} where main_article_no=#{mainArticleNo}
 	</update>	
 	
 	<!--자유게시판 조회수 증가 -->
@@ -53,8 +53,8 @@
   		<selectKey keyProperty="mainFreeRepleNo" resultType="int" order="BEFORE">
   			select main_free_reple_seq.nextval from dual
   		</selectKey>
-  			insert into main_free_reple(main_free_reple_no,main_article_no,main_free_reple_name,main_free_reple_content,main_free_date)
-  			values(#{mainFreeReple},#{mainArticleNo},#{mainFreeRepleName},#{mainFreeRepleContent},sysdate)
+  			insert into main_free_reple(main_free_reple_no,main_article_no,main_free_reple_name,main_free_reple_content,main_free_date,main_free_reple_cnt)
+  			values(#{mainFreeReple},#{mainArticleNo},#{mainFreeRepleName},#{mainFreeRepleContent},sysdate,main_reple_cnt)
 	</insert>	
 	<!--댓글 수정 -->
 	<update id="mainFreeBoardRepleUpdate" parameterType="MainFreeReple">
@@ -64,6 +64,26 @@
 	<delete id="mainFreeBoardRepleDelete" parameterType="int">
 		delete from main_free_reple where main_free_reple_no=#{mainFreeRepleNo}
 	</delete>
+	
+	<!-- 답글의 개수를 1 증가시킨다 -->
+	<update id="incrementFreeRepleCnt" parameterType="int">
+		update board set main_free_reple_cnt=main_free_reple_cnt+1 where main_article_no=#{mainArticleNo}
+	</update>
+	
+	<!--  답글의 개수를 1 감소시킨다 -->
+	<update id="decrementFreeRepleCnt" parameterType="int">
+		update board set main_free_reple_cnt=main_free_reple_cnt-1 where main_free_reple_no=#{mainArticleNo}
+	</update>
+	<!--  답글의 전체 개수 -->
+	<select id="freeReleCnt"  resultType="int">
+		select count(*) from main_free_reple
+	
+	</select>
+	
+	<!-- 공지게시판 전체 글 개수 출력 -->
+	<select id="mainNoticeCount"  resultType="int">
+			select count(*)	 from main_notice_board
+	</select>
 		
 	<!--공지게시판 리스트목록 얻어 오기(페이징) -->
 	<select id="mainNoticeBoardList" parameterType="hashmap" resultType="MainNoticeBoard">
@@ -102,6 +122,11 @@
 		 where main_notice_article_no=#{mainNoticeArticleNo}
 	</update>	
  	<!-- ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ -->
+ 	<!-- 고객센터 게시판 전체 글 개수 출력 -->
+	<select id="mainServiceCenterCount"  resultType="int">
+			select count(*)	 from service_center
+	</select>
+ 	
  		<!--고객센터 게시판 리스트목록 얻어 오기(페이징) -->
 	<select id="mainServiceCenterList" parameterType="hashmap" resultType="ServiceCenter">
 	<![CDATA[
@@ -141,25 +166,52 @@
  	
  	
  	<!--검색창에 검색해서 상품보기-->
- 	<select id="mainSearchItem" parameterType="String" resultType="Searchitem">
+ 	<select id="mainSearchItem" parameterType="String" resultType="Mainitem">
  		select i.item_name itemName,i.item_content itemContent,i.item_price itemPrice,i.item_date itemDate,img.img_name imgName
  		from item i,item_img img where i.item_no={itemNo} and img.item_no={itemNo}  
  	</select>
  	
  	
- 	<!--최신 상품 갖고오기 -->
+ 	<!-- 최신상품 등록순으로 -->
+	 <select id="mainNewItem" resultType="Item">
+	 <![CDATA[
+		select * from
+		(select rownum rnum,b.item_no,b.item_name,b.img_name, from 
+		(select i.item_no,i.item_name,m.img_name from item i,item_img m where i.item_no=#{itemNo} and m.item_no=#{itemNo} order by i.item_date desc) b
+		where rownum<=9) where rnum>=1; 
+		
+		select * from
+		(select rownum rnum,b.* from  
+		(select * from item order by item_date desc)b) where rnum<=10;
+		
+	]]>
+	</select>
+	
+	
+ 	<!--베스트 상품 갖고오기 x -->
+ 	<select id="mainNewItem"  resultType="item">
+	<![CDATA[
+		 select b2.* from
+		(select rownum rnum,b.* from
+		(select i.item_no,i.item_name,m.img_name,r.review_score 
+		from item i,item_review r,item_img m 
+		where m.img_no in(select min(img_no) from item_img group by item_no) and i.item_no=r.item_no(+) and i.item_no=m.item_no
+		order by r.review_score desc)b)b2 where rnum<=3;
+ 	]]>
+ 	</select>
+ 	
+ 	<!-- 메인 마감임박 상품 갖고오기 x -->
  	<select id="mainNewItem"  resultType="item">
 	<![CDATA[
 	select * from
 		(select rownum rnum,b.itemNo,b.itemName,b.itemPrice,b.itemSize,b.itemInven
 		b.itemDate,b.userId,b.bigKind,b.smallKind from  
-	(select * from item order by item_date desc)b) where rnum<=10
+	(select * from  item order by item_inven desc)b) where rnum<=10
  	]]>
  	</select>
  	
- 	
  	<!--최신개설 홈페이지 갖고오기  고치기-->
- 	<select id="mainNewProducddt" parameterType="String" resultType="home">
+ 	<select id="mainNewProducddt" parameterType="String" resultType="MainManiHomePage">
 	<![CDATA[
 	select * from
 		(select rownum rnum,b.itemNo,b.itemName,b.itemPrice,b.itemSize,b.itemInven
@@ -169,7 +221,22 @@
  	</select>
 
  	<!--개인 홈페이지 리스트  손봐야함-->
-	<select id="mainCustomerCenterList" parameterType="hashmap" resultType="CustomerCenter">
+	<select id="mainCenterList" parameterType="hashmap" resultType="MainManiHomePage">
+	<![CDATA[
+		 select * from  
+			(select rownum rnum, b1.* from
+				(select userId, homeTitle,homeImg,homeHits,homeIntroduce from home order by mainFaqNo desc) b1
+			where rownum <=#{end}) b2
+		where rnum>=#{start}
+		]]>
+	</select>
+	<!-- 개인 홈페이지 검색 -->
+	<select id="mainUserHomeSearch" parameterType="String" resultType="MainManiHomePage">
+		select home
+	</select>
+	
+	<!--인기 홈페이지 리스트  손봐야함-->
+	<select id="mainCenterList" parameterType="hashmap" resultType="MainManiHomePage">
 	<![CDATA[
 		 select * from  
 			(select rownum rnum, b1.* from
@@ -179,5 +246,27 @@
 		]]>
 	</select>
  
- 	
+ 	<!-- 카테고리별상품조회(리스트) -->
+ 	<select id="mainCategoryList" parameterType="hashmap" resultType="CategoryList">
+	<![CDATA[
+	select * from
+	(select rownum rnum,b.item_no,b.img_name from 
+	(select i.item_no,m.img_name from item i,item_img m where i.item_no=o.item_no and i.user_id=#{userId} and i.small_kind=#{smallKind}) b
+	where rownum<=9) where rnum>=1; 
+	]]>
+	</select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </mapper>
