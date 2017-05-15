@@ -1,5 +1,7 @@
 package com.icia.api.service;
 
+import java.util.*;
+
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
 
@@ -11,27 +13,47 @@ public class AdminService {
 	@Autowired
 	private AdminDao dao;
 	// 홈페이지 개설회원 조회
-	public Users FindOpenPageUser(Users user) {
+	public String FindOpenPageUser(Users user) {
 		return dao.FindOpenPageUser(user);
 	}
-	//개설회원정보상세보기
-	public Users OpenPageUserDetail(Users user) {
-		return dao.OpenPageUserDetail(user);
-	}
 	// 전체회원목록조회
-	public Users FindTotalUser(Users user) {
+	public String FindTotalUser(Users user) {
 		return dao.FindTotalUser(user);
 	}
 	// 회원상세조회
-	public Users DetailUser(Users userId) {
+	public Users DetailUser(String userId) {
 		return dao.DetailUser(userId);
 	}
 	//회원삭제
-	public void DeleteUser(Users userId) {
+	public void DeleteUser(String userId) {
 		dao.DeleteUser(userId);
 	}
 	//회원정보수정
 	public void UpdateUser(Users user) {
 		dao.UpdateUser(user);
+	}
+	//홈페이지삭제
+	public void DeleteUserPage(String userId) {
+		dao.DeleteUserPage(userId);
+	}
+	// 일별매출보기   
+	public List<OrderList> RevenueDayUser(OrderList orderList) {
+		return dao.RevenueDayUser(orderList);
+	}
+	// 달별매출보기
+	public List<OrderList> RevenueMonthUser(OrderList orderList) {
+		return dao.RevenueMonthUser(orderList);
+	}
+	// 연간매출보기  
+	public List<OrderList> RevenueYearUser(OrderList orderList) {
+		return dao.RevenueYearUser(orderList);
+	}
+	// 회원별 매출보기, 합계보기 
+	public List<OrderList> RevenueUserAndTotal(OrderList orderList) {
+		return dao.RevenueUserAndTotal(orderList);
+	}
+	// 전체매출보기 
+	public List<OrderList> RevenueUserTotal(OrderList orderList) {
+		return dao.RevenueUserTotal(orderList);
 	}
 }

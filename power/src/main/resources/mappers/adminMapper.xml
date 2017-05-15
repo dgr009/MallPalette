@@ -3,29 +3,31 @@
 <mapper namespace="api.dao.AdminDao">
 	<!-- 홈페이지 개설회원 조회 -->
 	<select id="findPageUser" parameterType="String" resultType="Users">
+	<![CDATA[
 		select user_id, user_name, user_ishome from users where user_ishome='1'
+	]]>
 	</select>
-
-	<!-- 개설회원정보상세보기 -->
-	<select id="openUserDetail" parameterType="String" resultType="Users">
-		select user_id, user_name, user_address, user_post, user_mail, user_phone, user_point, user_ishome from users where user_ishome='1'
-	</select>
-
 	<!-- 전체회원목록조회 -->
 	<select id="totalUserFind" resultType="Users">
+	<![CDATA[
 		select user_id, user_name from users
+	]]>
 	</select>
 
 	<!-- 회원상세조회 -->
 	<select id="userDetail" parameterType="String" resultType="Users">
+	<![CDATA[
 		select user_id, user_name, user_address, user_post, user_mail, user_phone, user_point, user_ishome from users where user_id=#{userId}
+	]]>
 	</select>
 
 	<!-- 회원삭제 -->
 	<delete id="userDelete" parameterType="String">
+	<![CDATA[	
 		delete from users where user_id=#{userId}
+	]]>
 	</delete>
-
+	
 	<!-- 회원정보수정 -->
 	<update id="userUpdate" parameterType="Users">
 	<![CDATA[
@@ -33,33 +35,48 @@
   		user_mail=#{userMail}, user_phone=#{userPhone}, user_ishome=#{userIshome}, user_grade=#{userGrade} where user_id=#{userId} 
   	]]>
 	</update>
+	
+	<!-- 홈페이지 삭제 -->
+	<delete id="userPageDelete" parameterType="home">
+	<![CDATA[
+		delete from home where user_id=#{userId}
+	]]>
+	</delete>
+	<!-- 일별매출보기 -->
+	<select id="userDayRevenue" parameterType="String" resultType="orderList">
+	<![CDATA[
+		select to_char(to_date(order_date,'yyyy-mm-dd'),'dd') as order_date, sum(order_price) as order_price 
+		from order_statement group by to_char(to_date(order_date,'yyyy-mm-dd'),'dd') order by order_date desc
+	]]>
+	</select>
 
-	<!-- 하루매출보기 -->
-
-	<!-- 한달매출보기 -->
-
+	<!-- 달별매출보기 -->
+  	<select id="userMonthRevenue" parameterType="String" resultType="orderList">
+  	<![CDATA[
+  		select to_char(to_date(order_date,'yyyy-mm-dd'),'mm') as order_date , sum(order_price) as order_price 
+  		from order_statement group by to_char(to_date(order_date,'yyyy-mm-dd'),'mm') order by order_date desc
+  	]]>
+  	</select>
+  	
+	<!-- 연간매출보기 -->
+ 	<select id="userYearRevenue" parameterType="String" resultType="orderList">
+ 	<![CDATA[
+ 		select to_char(to_date(order_date,'yyyy-mm-dd'),'yyyy') as order_date , sum(order_price) as order_price 
+		from order_statement group by to_char(to_date(order_date,'yyyy-mm-dd'),'yyyy') order by order_date desc
+ 	]]>
+ 	</select>
+ 	 
+ 	<!-- 회원별 매출보기, 합계보기 -->
+  	<select id="userAndTotalRevenue" parameterType="String" resultType="orderList">
+  	<![CDATA[
+  		select user_id, sum(order_price) from order_statement group by rollup(user_id)
+  	]]>
+  	</select>
+  	
 	<!-- 전체매출보기 -->
-
-	<!-- 회원하루매출보기 -->
-	<select id="userDayRevenue" parameterType="hashMap" resultType="OrderStatement">
-	<![CDATA[
-		SELECT TO_CHAR(TO_DATE(order_date,'yyyy-mm-dd'),'dd') AS order_date, SUM(order_price) AS order_price FROM order_statement where user_id=#{userId}
-		GROUP BY TO_CHAR(TO_DATE(order_date,'yyyy-mm-dd'),'dd') order by order_date desc;
-	]]>
-	</select>
-
-	<!-- 회원한달매출보기 -->
-	<select id="userMonthRevenue" parameterType="hashMap" resultType="OrderStatement">
-	<![CDATA[
-		  SELECT TO_CHAR(TO_DATE(order_date,'yyyy-mm-dd'),'mm') AS order_date, SUM(order_price) AS order_price FROM order_statement where user_id=#{userId}
-		  GROUP BY TO_CHAR(TO_DATE(order_date,'yyyy-mm-dd'),'mm') order by order_date desc;
-	]]>
-	</select>
-
-	<!-- 회원별,전체매출보기 -->
-	<select id="userTotalRevenue" >
-	<![CDATA[
-	SELECT user_id, SUM(order_price) FROM order_statement GROUP BY ROLLUP(user_id);
-	]]> 
-	</select>
+  	<select id="userTotalRevenue" parameterType="String" resultType="orderList">
+  	<![CDATA[
+  		select sum(order_price) from order_statement 
+  	]]>
+  	</select>
 </mapper>
