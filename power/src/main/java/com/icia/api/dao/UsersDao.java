@@ -101,7 +101,7 @@ public class UsersDao {
 	public Users userInfo(String userId){
 		return tpl.selectOne("api.dao.UsersDao.usersInfo",userId);
 	}
-	//개인 회원 정보 변경
+	//개인 회원 정보 변경 
 	public int userUpdate(Users user){
 		return tpl.update("api.dao.UsersDao.usersUpdate",user);
 	}
@@ -121,6 +121,4 @@ public class UsersDao {
 	public int basketDelete(String userId){
 		return tpl.delete("api.dao.UsersDao.usersBasketDelete",userId);
 	}
-
-	
 }
