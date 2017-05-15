@@ -65,5 +65,4 @@ public class PagingUtil {
 		pagination.setPageNo(pageNo);
 		return pagination;
 	}
-
 }
